@@ -1,5 +1,5 @@
 CC     = gcc
-CFLAGS = -Wall -Wextra -std=c11 -O2 -g
+CFLAGS = -Wall -Wextra -std=gnu11 -O2 -g
 
 OBJ_SHARED = vector.o posting.o avl/avl.o rbtree/rbtree.o btree/btree.o \
              index/index.o index/search.o

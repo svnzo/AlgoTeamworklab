@@ -98,6 +98,7 @@ static void test_many(void) {
 }
 
 int main(void) {
+    setvbuf(stdout, NULL, _IONBF, 0);
     test_empty();
     test_insert_no_split();
     test_split();

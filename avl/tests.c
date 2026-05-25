@@ -117,6 +117,7 @@ static void test_many_inserts(void) {
 }
 
 int main(void) {
+    setvbuf(stdout, NULL, _IONBF, 0);
     test_create_free();
     test_insert_search();
     test_duplicate_key();

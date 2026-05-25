@@ -100,6 +100,7 @@ static void test_black_height(void) {
 }
 
 int main(void) {
+    setvbuf(stdout, NULL, _IONBF, 0);
     test_create();
     test_basic_insert();
     test_duplicate();
