@@ -1,7 +1,7 @@
 CC     = gcc
 CFLAGS = -Wall -Wextra -std=c11 -O2 -g
 
-OBJ_SHARED = posting.o avl/avl.o rbtree/rbtree.o btree/btree.o \
+OBJ_SHARED = vector.o posting.o avl/avl.o rbtree/rbtree.o btree/btree.o \
              index/index.o index/search.o
 
 .PHONY: all app u_tests test clean
@@ -11,14 +11,14 @@ all: app u_tests
 app: $(OBJ_SHARED) main.o
 	$(CC) $(CFLAGS) -o app $(OBJ_SHARED) main.o
 
-test_avl: posting.o avl/avl.o avl/tests.o
-	$(CC) $(CFLAGS) -o test_avl posting.o avl/avl.o avl/tests.o
+test_avl: vector.o posting.o avl/avl.o avl/tests.o
+	$(CC) $(CFLAGS) -o test_avl vector.o posting.o avl/avl.o avl/tests.o
 
-test_rb: posting.o rbtree/rbtree.o rbtree/tests.o
-	$(CC) $(CFLAGS) -o test_rb posting.o rbtree/rbtree.o rbtree/tests.o
+test_rb: vector.o posting.o rbtree/rbtree.o rbtree/tests.o
+	$(CC) $(CFLAGS) -o test_rb vector.o posting.o rbtree/rbtree.o rbtree/tests.o
 
-test_btree: posting.o btree/btree.o btree/tests.o
-	$(CC) $(CFLAGS) -o test_btree posting.o btree/btree.o btree/tests.o
+test_btree: vector.o posting.o btree/btree.o btree/tests.o
+	$(CC) $(CFLAGS) -o test_btree vector.o posting.o btree/btree.o btree/tests.o
 
 u_tests: test_avl test_rb test_btree
 	./test_avl
