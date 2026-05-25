@@ -1,0 +1,25 @@
+# build artifacts
+*.o
+app
+test_avl
+test_rb
+test_btree
+
+# data
+data/Questions.csv
+data/Answers.csv
+data/Tags.csv
+data/processed/
+data/index_*.txt
+data/test/
+
+# python
+__pycache__/
+*.pyc
+.venv/
+
+# editors
+.vscode/
+.idea/
+*.swp
+.DS_Store
