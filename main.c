@@ -6,24 +6,26 @@
 #include "index/search.h"
 
 
-static void runSearch(TreeType type, const char* idx_path,
-                      const char* query, int json_out) {
-    // Index* idx = loadIndex(idx_path, type);
-    // if (!idx) { fprintf(stderr, "Failed to load index: %s\n", idx_path); exit(1); }
+static void runSearch(TreeType type, const char* idx_path, const char* query,
+                      int json_out, int fuzzy, int max_dist) {
+    Index* idx = loadIndex(idx_path, type);
+    if (!idx) { fprintf(stderr, "Failed to load index: %s\n", idx_path); exit(1); }
 
-    // SearchResults* sr = search(idx, query);
-    // if (json_out) printResultsJSON(sr);
-    // else          printResultsText(sr);
+    SearchResults* sr = fuzzy ? fuzzySearch(idx, query, max_dist)
+                              : search(idx, query);
+    if (json_out) printResultsJSON(sr);
+    else          printResultsText(sr);
 
-    // freeSearchResults(sr);
-    // freeIndex(idx);
+    freeSearchResults(sr);
+    freeIndex(idx);
 }
 
 static void usage(const char* prog) {
     fprintf(stderr,
         "Usage:\n"
         "  %s index  --type=<avl|rb|btree> [--data=PATH] [--index=PATH]\n"
-        "  %s search --type=<avl|rb|btree> [--index=PATH] [--json] \"query\"\n",
+        "  %s search --type=<avl|rb|btree> [--index=PATH] [--json]"
+        " [--fuzzy[=DIST]] \"query\"\n",
         prog, prog);
 }
 
@@ -35,6 +37,8 @@ int main(int argc, char* argv[]) { // пример)
     const char* data_path = "data/processed/docs.jsonl";
     char        idx_path[512] = {0};
     int         json_out = 0;
+    int         fuzzy    = 0;
+    int         max_dist = 2;
     const char* query    = NULL;
 
     for (int i = 2; i < argc; i++) {
@@ -43,6 +47,12 @@ int main(int argc, char* argv[]) { // пример)
         else if (strncmp(argv[i], "--index=", 8) == 0)
             strncpy(idx_path, argv[i] + 8, sizeof(idx_path) - 1);
         else if (strcmp(argv[i], "--json")    == 0)    json_out = 1;
+        else if (strcmp(argv[i], "--fuzzy")   == 0)    fuzzy = 1;
+        else if (strncmp(argv[i], "--fuzzy=", 8) == 0) {
+            fuzzy = 1;
+            max_dist = atoi(argv[i] + 8);
+            if (max_dist < 1) max_dist = 1;
+        }
         else if (argv[i][0] != '-')                    query = argv[i];
     }
 
@@ -53,7 +63,7 @@ int main(int argc, char* argv[]) { // пример)
         runIndex(type, data_path, idx_path);
     } else if (strcmp(mode, "search") == 0) {
         if (!query) { fprintf(stderr, "No query provided\n"); return 1; }
-        runSearch(type, idx_path, query, json_out);
+        runSearch(type, idx_path, query, json_out, fuzzy, max_dist);
     } else {
         fprintf(stderr, "Unknown mode: %s\n", mode);
         usage(argv[0]);

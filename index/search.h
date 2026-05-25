@@ -19,3 +19,14 @@ SearchResults* search(Index* idx, const char* query);
 void           printResultsText(const SearchResults* sr);
 void           printResultsJSON(const SearchResults* sr);
 void           freeSearchResults(SearchResults* sr);
+
+/* ---- fuzzy search (Левенштейн) ---- */
+
+typedef struct {
+    char    term[128];
+    int     distance;
+    Vector* postings;   /* shared ref внутри индекса, не освобождать вручную */
+} FuzzyCandidate;
+
+Vector*        fuzzyFindCandidates(Index* idx, const char* term, int max_distance);
+SearchResults* fuzzySearch(Index* idx, const char* query, int max_distance);
