@@ -312,7 +312,21 @@ for (size_t i = 0; i < sr->results->size; i++) {
 
 ## Задача 3: Эксперименты
 
-Сравнить три структуры на трёх метриках.
+Сравнить три структуры на трёх метриках. Все цифры собираются скриптом
+`bench.py` — он сам нарежет датасет на 50k/200k/500k и прогонит индексацию,
+поиск и память для каждой структуры.
+
+```bash
+# препроцессим один раз
+python preprocess.py --input data/Questions.csv --output data/processed/docs.jsonl
+
+# собираем бинарник и гоняем бенч
+make app
+python bench.py --docs data/processed/docs.jsonl --sizes 50000,200000,500000
+
+# результат — markdown-таблицы в stdout, можно вставить прямо ниже
+```
+
 
 ### 3.1 Время индексации
 
@@ -464,9 +478,14 @@ python preprocess.py --input data/Questions.csv --output data/processed/docs.jso
 ### Поиск
 
 ```bash
+# точный (AND-семантика)
 ./app search --type=avl "memory leak"
 ./app search --type=rb "python list sort"
 ./app search --type=btree "balanced binary tree"
+
+# fuzzy (Левенштейн, по умолчанию max_dist=2)
+./app search --type=avl --fuzzy "pythn lst"
+./app search --type=rb --fuzzy=1 "memoy"
 ```
 
 ### Streamlit-интерфейс
