@@ -1,0 +1,21 @@
+name: ci
+
+on:
+  push:
+    branches: [main, lab5]
+  pull_request:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: install gcc
+        run: sudo apt-get update && sudo apt-get install -y gcc make
+
+      - name: build
+        run: make app
+
+      - name: unit tests
+        run: make u_tests
