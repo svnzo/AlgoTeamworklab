@@ -19,7 +19,6 @@
 import argparse
 import json
 import re
-import resource
 import subprocess
 import sys
 import tempfile
@@ -59,8 +58,9 @@ def take_n(src: Path, n: int, dst: Path) -> int:
     return i
 
 
-def run_index(t: str, data: Path, idx: Path) -> tuple[float, int]:
-    """Запускает ./app index, возвращает (время сек, max_rss KB)."""
+def run_index(t: str, data: Path, idx: Path) -> tuple[float, float]:
+    """Запускает ./app index, возвращает (время сек, max_rss МБ).
+    Память берём из stderr самого ./app — он печатает 'RSS: X.X MB'."""
     t0 = time.monotonic()
     proc = subprocess.run(
         [str(APP), "index", f"--type={t}", f"--data={data}", f"--index={idx}"],
@@ -69,11 +69,13 @@ def run_index(t: str, data: Path, idx: Path) -> tuple[float, int]:
     wall = time.monotonic() - t0
     if proc.returncode != 0:
         print(f"!! index failed for {t}: {proc.stderr[:300]}", file=sys.stderr)
-        return wall, 0
+        return wall, 0.0
 
-    # max_rss дочернего — у unix через wait4/getrusage(RUSAGE_CHILDREN)
-    rss = resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss
-    return wall, rss
+    rss_mb = 0.0
+    m = re.search(r"RSS:\s*([\d.]+)\s*MB", proc.stderr)
+    if m:
+        rss_mb = float(m.group(1))
+    return wall, rss_mb
 
 
 def run_search(t: str, idx: Path, query: str) -> float:
@@ -105,9 +107,9 @@ def bench_indexing(docs: Path, sizes: list[int]) -> dict:
             mem_row = {}
             for t in TYPES:
                 idx_path = td_path / f"idx_{t}_{n}.txt"
-                sec, rss_kb = run_index(t, tiny, idx_path)
+                sec, rss_mb = run_index(t, tiny, idx_path)
                 row.append(f"{sec:.2f}")
-                mem_row[t] = rss_kb / 1024  # MB
+                mem_row[t] = rss_mb
             print("| " + " | ".join(row) + " |")
             mem_by_size[actual] = mem_row
     return mem_by_size

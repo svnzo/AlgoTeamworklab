@@ -28,7 +28,7 @@ def preprocess(input_path: Path, output_path: Path, limit: int | None) -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
     count = 0
-    with open(input_path, encoding="utf-8") as f, open(output_path, "w", encoding="utf-8") as out:
+    with open(input_path, encoding="utf-8", errors="replace") as f, open(output_path, "w", encoding="utf-8") as out:
         reader = csv.DictReader(f)
         for row in reader:
             if limit is not None and count >= limit:
