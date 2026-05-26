@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <sys/resource.h>
 
 /* ---------- create/free ---------- */
 
@@ -267,5 +268,16 @@ void runIndex(TreeType type, const char* data_path, const char* idx_path) {
 
     saveIndex(idx, idx_path);
     fprintf(stderr, "Index saved: %s\n", idx_path);
+
+    /* печатаем максимальную память — bench.py парсит */
+    struct rusage ru;
+    getrusage(RUSAGE_SELF, &ru);
+#ifdef __APPLE__
+    double mb = ru.ru_maxrss / (1024.0 * 1024.0);  /* macOS: bytes */
+#else
+    double mb = ru.ru_maxrss / 1024.0;             /* Linux: KB */
+#endif
+    fprintf(stderr, "RSS: %.1f MB\n", mb);
+
     freeIndex(idx);
 }
